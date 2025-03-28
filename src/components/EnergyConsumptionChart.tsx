@@ -11,9 +11,24 @@ interface ChartProps {
     minimum: boolean;
     maximum: boolean;
   };
+  traceColors?: {
+    temperature: string;
+    minimum: string;
+    maximum: string;
+    average: string;
+  };
 }
 
-const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
+const EnergyConsumptionChart: React.FC<ChartProps> = ({ 
+  period, 
+  traces,
+  traceColors = {
+    temperature: '#FF6B4A',
+    minimum: '#50C878',
+    maximum: '#1E90FF',
+    average: '#9370DB'
+  }
+}) => {
   const mainChartRef = useRef<HTMLDivElement>(null);
   const miniChartRef = useRef<HTMLDivElement>(null);
   
@@ -50,14 +65,6 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
     peak: ""
   });
 
-  // Default colors for traces
-  const [traceColors, setTraceColors] = useState({
-    temperature: '#FF6B4A',
-    minimum: '#50C878',
-    maximum: '#1E90FF',
-    average: '#9370DB'
-  });
-
   useEffect(() => {
     // Update tooltip data
     const consumptionValues = data.map(item => item.consumption);
@@ -82,14 +89,6 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
       renderCharts();
     }
   }, [data, traces, traceColors]);
-
-  // Handle color change for traces
-  const handleColorChange = (trace: keyof typeof traceColors, color: string) => {
-    setTraceColors(prev => ({
-      ...prev,
-      [trace]: color
-    }));
-  };
 
   const renderCharts = () => {
     if (!mainChartRef.current || !miniChartRef.current) return;

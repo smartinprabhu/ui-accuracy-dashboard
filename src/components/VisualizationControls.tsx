@@ -58,20 +58,29 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
           onClick={() => toggleTrace('temperature')}
         >
           <div className="flex items-center">
-            <div className={`w-4 h-4 rounded-full ${traces.temperature ? 'bg-red-500' : 'bg-gray-500'} mr-2`} style={{ backgroundColor: traces.temperature ? traceColors.temperature : '#6b7280' }}></div>
+            <div 
+              className="w-4 h-4 rounded-full mr-2" 
+              style={{ backgroundColor: traces.temperature ? traceColors.temperature : '#6b7280' }}
+            ></div>
             <span className="text-gray-300 text-sm flex items-center">
               <Thermometer size={14} className="mr-1" />
               Temperature
             </span>
           </div>
           {traces.temperature && onColorChange && (
-            <input 
-              type="color" 
-              value={traceColors.temperature}
-              onChange={(e) => handleColorChange('temperature', e)}
-              onClick={e => e.stopPropagation()}
-              className="w-6 h-6 rounded cursor-pointer"
-            />
+            <div className="flex items-center relative">
+              <input 
+                type="color" 
+                value={traceColors.temperature}
+                onChange={(e) => handleColorChange('temperature', e)}
+                onClick={e => e.stopPropagation()}
+                className="absolute opacity-0 w-6 h-6 cursor-pointer"
+              />
+              <div 
+                className="w-6 h-6 rounded-full cursor-pointer" 
+                style={{ backgroundColor: traceColors.temperature }}
+              ></div>
+            </div>
           )}
         </div>
         
@@ -80,20 +89,29 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
           onClick={() => toggleTrace('minimum')}
         >
           <div className="flex items-center">
-            <div className={`w-4 h-4 rounded-full ${traces.minimum ? 'bg-green-500' : 'bg-gray-500'} mr-2`} style={{ backgroundColor: traces.minimum ? traceColors.minimum : '#6b7280' }}></div>
+            <div 
+              className="w-4 h-4 rounded-full mr-2" 
+              style={{ backgroundColor: traces.minimum ? traceColors.minimum : '#6b7280' }}
+            ></div>
             <span className="text-gray-300 text-sm flex items-center">
               <TrendingDown size={14} className="mr-1" />
               Minimum
             </span>
           </div>
           {traces.minimum && onColorChange && (
-            <input 
-              type="color" 
-              value={traceColors.minimum}
-              onChange={(e) => handleColorChange('minimum', e)}
-              onClick={e => e.stopPropagation()}
-              className="w-6 h-6 rounded cursor-pointer"
-            />
+            <div className="flex items-center relative">
+              <input 
+                type="color" 
+                value={traceColors.minimum}
+                onChange={(e) => handleColorChange('minimum', e)}
+                onClick={e => e.stopPropagation()}
+                className="absolute opacity-0 w-6 h-6 cursor-pointer"
+              />
+              <div 
+                className="w-6 h-6 rounded-full cursor-pointer" 
+                style={{ backgroundColor: traceColors.minimum }}
+              ></div>
+            </div>
           )}
         </div>
         
@@ -102,20 +120,29 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
           onClick={() => toggleTrace('average')}
         >
           <div className="flex items-center">
-            <div className={`w-4 h-4 rounded-full ${traces.average ? 'bg-purple-500' : 'bg-gray-500'} mr-2`} style={{ backgroundColor: traces.average ? traceColors.average : '#6b7280' }}></div>
+            <div 
+              className="w-4 h-4 rounded-full mr-2" 
+              style={{ backgroundColor: traces.average ? traceColors.average : '#6b7280' }}
+            ></div>
             <span className="text-gray-300 text-sm flex items-center">
               <Activity size={14} className="mr-1" />
               Average
             </span>
           </div>
           {traces.average && onColorChange && (
-            <input 
-              type="color" 
-              value={traceColors.average}
-              onChange={(e) => handleColorChange('average', e)}
-              onClick={e => e.stopPropagation()}
-              className="w-6 h-6 rounded cursor-pointer"
-            />
+            <div className="flex items-center relative">
+              <input 
+                type="color" 
+                value={traceColors.average}
+                onChange={(e) => handleColorChange('average', e)}
+                onClick={e => e.stopPropagation()}
+                className="absolute opacity-0 w-6 h-6 cursor-pointer"
+              />
+              <div 
+                className="w-6 h-6 rounded-full cursor-pointer" 
+                style={{ backgroundColor: traceColors.average }}
+              ></div>
+            </div>
           )}
         </div>
         
@@ -124,20 +151,29 @@ const VisualizationControls: React.FC<VisualizationControlsProps> = ({
           onClick={() => toggleTrace('maximum')}
         >
           <div className="flex items-center">
-            <div className={`w-4 h-4 rounded-full ${traces.maximum ? 'bg-blue-500' : 'bg-gray-500'} mr-2`} style={{ backgroundColor: traces.maximum ? traceColors.maximum : '#6b7280' }}></div>
+            <div 
+              className="w-4 h-4 rounded-full mr-2" 
+              style={{ backgroundColor: traces.maximum ? traceColors.maximum : '#6b7280' }}
+            ></div>
             <span className="text-gray-300 text-sm flex items-center">
               <TrendingUp size={14} className="mr-1" />
               Maximum
             </span>
           </div>
           {traces.maximum && onColorChange && (
-            <input 
-              type="color" 
-              value={traceColors.maximum}
-              onChange={(e) => handleColorChange('maximum', e)}
-              onClick={e => e.stopPropagation()}
-              className="w-6 h-6 rounded cursor-pointer"
-            />
+            <div className="flex items-center relative">
+              <input 
+                type="color" 
+                value={traceColors.maximum}
+                onChange={(e) => handleColorChange('maximum', e)}
+                onClick={e => e.stopPropagation()}
+                className="absolute opacity-0 w-6 h-6 cursor-pointer"
+              />
+              <div 
+                className="w-6 h-6 rounded-full cursor-pointer" 
+                style={{ backgroundColor: traceColors.maximum }}
+              ></div>
+            </div>
           )}
         </div>
       </div>

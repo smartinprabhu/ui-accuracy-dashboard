@@ -72,7 +72,8 @@ const Index = () => {
             </div>
             <EnergyConsumptionChart 
               period={activePeriod} 
-              traces={traces} 
+              traces={traces}
+              traceColors={traceColors}
             />
           </div>
           
