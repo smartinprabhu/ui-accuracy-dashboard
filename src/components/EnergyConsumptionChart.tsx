@@ -1,18 +1,6 @@
 
-import { useEffect, useState } from "react";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer, 
-  Line, 
-  ComposedChart,
-  ReferenceLine
-} from "recharts";
+import { useEffect, useState, useRef } from "react";
+import Plotly from "plotly.js-dist-min";
 import { Camera, ZoomIn, PlusCircle, BarChart3, LayoutGrid, Maximize, Circle } from "lucide-react";
 
 interface ChartProps {
@@ -26,6 +14,9 @@ interface ChartProps {
 }
 
 const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
+  const mainChartRef = useRef<HTMLDivElement>(null);
+  const miniChartRef = useRef<HTMLDivElement>(null);
+  
   // Generate hourly data for the current day
   const generateHourlyData = () => {
     const data = [];
@@ -78,132 +69,221 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
     });
   }, [data]);
 
-  // Calculate average, min, max values
-  const avgValue = tooltip.avg;
-  const minValue = tooltip.min;
-  const maxValue = tooltip.max;
+  useEffect(() => {
+    if (mainChartRef.current && miniChartRef.current) {
+      renderCharts();
+    }
+  }, [data, traces]);
+
+  const renderCharts = () => {
+    if (!mainChartRef.current || !miniChartRef.current) return;
+
+    // Prepare data for consumption bars
+    const times = data.map(item => item.time);
+    const consumption = data.map(item => item.consumption);
+    const temperatures = data.map(item => item.temperature);
+
+    // Main chart data
+    const mainChartData: Plotly.Data[] = [
+      {
+        x: times,
+        y: consumption,
+        type: 'bar',
+        name: 'Consumption (kWh)',
+        marker: {
+          color: '#4169E1'
+        }
+      }
+    ];
+
+    // Add temperature line if enabled
+    if (traces.temperature) {
+      mainChartData.push({
+        x: times,
+        y: temperatures,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Temperature (°C)',
+        marker: { color: '#FF6B4A', size: 4 },
+        line: { color: '#FF6B4A', width: 2 },
+        yaxis: 'y2'
+      });
+    }
+
+    // Add reference lines for min, max, avg if enabled
+    if (traces.minimum) {
+      mainChartData.push({
+        x: times,
+        y: Array(times.length).fill(tooltip.min),
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Minimum',
+        line: { color: '#50C878', width: 2, dash: 'dash' }
+      });
+    }
+
+    if (traces.maximum) {
+      mainChartData.push({
+        x: times,
+        y: Array(times.length).fill(tooltip.max),
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Maximum',
+        line: { color: '#1E90FF', width: 2, dash: 'dash' }
+      });
+    }
+
+    if (traces.average) {
+      mainChartData.push({
+        x: times,
+        y: Array(times.length).fill(tooltip.avg),
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Average',
+        line: { color: '#9370DB', width: 2, dash: 'dash' }
+      });
+    }
+
+    // Main chart layout
+    const mainChartLayout: Partial<Plotly.Layout> = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      margin: { t: 10, r: 50, l: 50, b: 50 },
+      height: 400,
+      grid: { rows: 1, columns: 1, pattern: 'independent' },
+      legend: {
+        orientation: 'h',
+        y: -0.2,
+        x: 0.5,
+        xanchor: 'center',
+        font: { color: '#999' }
+      },
+      xaxis: {
+        title: data[0]?.day || 'Mar 25, 2025',
+        titlefont: { color: '#999' },
+        tickfont: { color: '#999' },
+        gridcolor: '#333'
+      },
+      yaxis: {
+        title: 'Consumption (kWh)',
+        titlefont: { color: '#999' },
+        tickfont: { color: '#999' },
+        gridcolor: '#333'
+      },
+      yaxis2: {
+        title: 'Temperature (°C)',
+        titlefont: { color: '#999' },
+        tickfont: { color: '#999' },
+        overlaying: 'y',
+        side: 'right'
+      },
+      annotations: []
+    };
+
+    // Add annotations for reference lines if enabled
+    if (traces.minimum) {
+      mainChartLayout.annotations!.push({
+        x: times[times.length - 1],
+        y: tooltip.min,
+        xref: 'x',
+        yref: 'y',
+        text: 'Min',
+        showarrow: false,
+        font: { color: '#50C878' },
+        xanchor: 'left'
+      });
+    }
+
+    if (traces.maximum) {
+      mainChartLayout.annotations!.push({
+        x: times[times.length - 1],
+        y: tooltip.max,
+        xref: 'x',
+        yref: 'y',
+        text: 'Max',
+        showarrow: false,
+        font: { color: '#1E90FF' },
+        xanchor: 'left'
+      });
+    }
+
+    if (traces.average) {
+      mainChartLayout.annotations!.push({
+        x: times[times.length - 1],
+        y: tooltip.avg,
+        xref: 'x',
+        yref: 'y',
+        text: 'Avg',
+        showarrow: false,
+        font: { color: '#9370DB' },
+        xanchor: 'left'
+      });
+    }
+
+    // Mini chart data
+    const miniChartData = [
+      {
+        x: times,
+        y: consumption,
+        type: 'bar',
+        name: 'Consumption',
+        marker: { color: '#4169E1' },
+        showlegend: false,
+        hoverinfo: 'none'
+      }
+    ];
+
+    if (traces.temperature) {
+      miniChartData.push({
+        x: times,
+        y: temperatures,
+        type: 'scatter',
+        mode: 'lines',
+        name: 'Temperature',
+        line: { color: '#FF6B4A', width: 1 },
+        showlegend: false,
+        hoverinfo: 'none'
+      });
+    }
+
+    // Mini chart layout
+    const miniChartLayout: Partial<Plotly.Layout> = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(0,0,0,0)',
+      margin: { t: 0, r: 30, l: 30, b: 0 },
+      height: 75,
+      showlegend: false,
+      xaxis: {
+        showticklabels: false,
+        showgrid: false
+      },
+      yaxis: {
+        showticklabels: false,
+        showgrid: false
+      }
+    };
+
+    // Config options for both charts
+    const config: Partial<Plotly.Config> = {
+      displayModeBar: false,
+      responsive: true
+    };
+
+    // Render both charts
+    Plotly.newPlot(mainChartRef.current, mainChartData, mainChartLayout, config);
+    Plotly.newPlot(miniChartRef.current, miniChartData, miniChartLayout, config);
+  };
 
   return (
     <div className="h-[500px] relative">
-      <ResponsiveContainer width="100%" height="85%">
-        <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-          <XAxis 
-            dataKey="time" 
-            stroke="#666" 
-            tick={{ fill: '#999' }}
-            label={{ 
-              value: data[0]?.day || 'Mar 25, 2025', 
-              position: 'insideBottom', 
-              offset: -5,
-              fill: '#999'
-            }} 
-          />
-          <YAxis 
-            yAxisId="left" 
-            orientation="left" 
-            stroke="#666" 
-            tick={{ fill: '#999' }}
-            label={{ 
-              value: 'Consumption', 
-              angle: -90, 
-              position: 'insideLeft',
-              fill: '#999'
-            }}
-          />
-          <YAxis 
-            yAxisId="right" 
-            orientation="right" 
-            stroke="#666" 
-            tick={{ fill: '#999' }}
-            label={{ 
-              value: 'Temperature', 
-              angle: 90, 
-              position: 'insideRight',
-              fill: '#999'
-            }}
-          />
-          <Tooltip 
-            content={({ active, payload }) => {
-              if (active && payload && payload.length) {
-                return (
-                  <div className="bg-black border border-gray-700 p-2 rounded">
-                    <p className="text-white">{`Time: ${payload[0].payload.time}`}</p>
-                    <p className="text-blue-400">{`Consumption: ${payload[0].value} kWh`}</p>
-                    {traces.temperature && (
-                      <p className="text-orange-400">{`Temperature: ${payload[1]?.value}°C`}</p>
-                    )}
-                  </div>
-                );
-              }
-              return null;
-            }}
-          />
-          <Legend iconType="circle" />
-          <Bar yAxisId="left" dataKey="consumption" name="Consumption (1D)" fill="#4169E1" barSize={20} />
-          
-          {traces.temperature && (
-            <Line 
-              yAxisId="right" 
-              type="monotone" 
-              dataKey="temperature" 
-              name="Temperature (1D)" 
-              stroke="#FF6B4A" 
-              strokeWidth={2} 
-              dot={{ r: 1 }} 
-            />
-          )}
-          
-          {traces.average && (
-            <ReferenceLine 
-              yAxisId="left" 
-              y={avgValue} 
-              stroke="#9370DB" 
-              strokeDasharray="3 3"
-              label={{ 
-                value: 'Avg', 
-                position: 'right', 
-                fill: '#9370DB' 
-              }} 
-            />
-          )}
-          
-          {traces.minimum && (
-            <ReferenceLine 
-              yAxisId="left" 
-              y={minValue} 
-              stroke="#50C878" 
-              strokeDasharray="3 3"
-              label={{ 
-                value: 'Min', 
-                position: 'right', 
-                fill: '#50C878' 
-              }} 
-            />
-          )}
-          
-          {traces.maximum && (
-            <ReferenceLine 
-              yAxisId="left" 
-              y={maxValue} 
-              stroke="#1E90FF" 
-              strokeDasharray="3 3"
-              label={{ 
-                value: 'Max', 
-                position: 'right', 
-                fill: '#1E90FF' 
-              }} 
-            />
-          )}
-        </ComposedChart>
-      </ResponsiveContainer>
+      <div ref={mainChartRef} className="h-[85%]"></div>
       
       {tooltip.visible && (
         <div className="absolute top-10 right-10 bg-black border border-gray-700 p-2 rounded text-xs text-white">
           <p className="text-white">Max: {tooltip.max} (24 Mar 25, 02 PM)</p>
           <p className="text-white">Min: {tooltip.min} (24 Mar 25, 09 PM)</p>
           <p className="text-white">Avg: {tooltip.avg}</p>
-          <p className="text-white">Peak Hour: 11 AM</p>
+          <p className="text-white">Peak Hour: {tooltip.peak}</p>
         </div>
       )}
       
@@ -232,16 +312,7 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
       </div>
 
       {/* Secondary small chart at the bottom */}
-      <div className="h-[15%] mt-1">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
-            <Bar dataKey="consumption" fill="#4169E1" barSize={10} />
-            {traces.temperature && (
-              <Line type="monotone" dataKey="temperature" stroke="#FF6B4A" strokeWidth={1} dot={false} />
-            )}
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      <div ref={miniChartRef} className="h-[15%] mt-1"></div>
     </div>
   );
 };
