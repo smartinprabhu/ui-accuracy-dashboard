@@ -10,7 +10,8 @@ import {
   Legend, 
   ResponsiveContainer, 
   Line, 
-  ComposedChart 
+  ComposedChart,
+  ReferenceLine
 } from "recharts";
 import { Camera, ZoomIn, PlusCircle, BarChart3, LayoutGrid, Maximize, Circle } from "lucide-react";
 
@@ -51,7 +52,7 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
 
   const [data, setData] = useState(generateHourlyData());
   const [tooltip, setTooltip] = useState({
-    visible: false,
+    visible: true,
     max: 0,
     min: 0,
     avg: 0,
@@ -76,6 +77,11 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
       peak: peakHour
     });
   }, [data]);
+
+  // Calculate average, min, max values
+  const avgValue = tooltip.avg;
+  const minValue = tooltip.min;
+  const maxValue = tooltip.max;
 
   return (
     <div className="h-[500px] relative">
@@ -135,7 +141,60 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
           />
           <Legend iconType="circle" />
           <Bar yAxisId="left" dataKey="consumption" name="Consumption (1D)" fill="#4169E1" barSize={20} />
-          {traces.temperature && <Line yAxisId="right" type="monotone" dataKey="temperature" name="Temperature (1D)" stroke="#FF6B4A" strokeWidth={2} dot={{ r: 1 }} />}
+          
+          {traces.temperature && (
+            <Line 
+              yAxisId="right" 
+              type="monotone" 
+              dataKey="temperature" 
+              name="Temperature (1D)" 
+              stroke="#FF6B4A" 
+              strokeWidth={2} 
+              dot={{ r: 1 }} 
+            />
+          )}
+          
+          {traces.average && (
+            <ReferenceLine 
+              yAxisId="left" 
+              y={avgValue} 
+              stroke="#9370DB" 
+              strokeDasharray="3 3"
+              label={{ 
+                value: 'Avg', 
+                position: 'right', 
+                fill: '#9370DB' 
+              }} 
+            />
+          )}
+          
+          {traces.minimum && (
+            <ReferenceLine 
+              yAxisId="left" 
+              y={minValue} 
+              stroke="#50C878" 
+              strokeDasharray="3 3"
+              label={{ 
+                value: 'Min', 
+                position: 'right', 
+                fill: '#50C878' 
+              }} 
+            />
+          )}
+          
+          {traces.maximum && (
+            <ReferenceLine 
+              yAxisId="left" 
+              y={maxValue} 
+              stroke="#1E90FF" 
+              strokeDasharray="3 3"
+              label={{ 
+                value: 'Max', 
+                position: 'right', 
+                fill: '#1E90FF' 
+              }} 
+            />
+          )}
         </ComposedChart>
       </ResponsiveContainer>
       
@@ -177,7 +236,9 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
             <Bar dataKey="consumption" fill="#4169E1" barSize={10} />
-            <Line type="monotone" dataKey="temperature" stroke="#FF6B4A" strokeWidth={1} dot={false} />
+            {traces.temperature && (
+              <Line type="monotone" dataKey="temperature" stroke="#FF6B4A" strokeWidth={1} dot={false} />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </div>

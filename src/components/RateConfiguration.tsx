@@ -1,9 +1,21 @@
 
 import { useState } from "react";
+import { Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 const RateConfiguration = () => {
   const [cost, setCost] = useState("0.12");
   const [carbon, setCarbon] = useState("0.63");
+  const { toast } = useToast();
+
+  const handleSave = () => {
+    toast({
+      title: "Configuration Updated",
+      description: `Cost: ${cost} Rs/kW, Carbon: ${carbon} /kW`,
+      variant: "default",
+    });
+  };
 
   return (
     <div className="bg-[#242836] p-4 rounded-lg">
@@ -33,6 +45,16 @@ const RateConfiguration = () => {
             />
           </div>
         </div>
+
+        <Button 
+          variant="default" 
+          size="sm"
+          className="w-full mt-3 bg-[#323548] hover:bg-[#1a1c28] text-gray-300 border border-gray-700"
+          onClick={handleSave}
+        >
+          <Save size={14} className="mr-1" />
+          Apply Changes
+        </Button>
       </div>
     </div>
   );
