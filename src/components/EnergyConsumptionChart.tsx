@@ -50,6 +50,14 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
     peak: ""
   });
 
+  // Default colors for traces
+  const [traceColors, setTraceColors] = useState({
+    temperature: '#FF6B4A',
+    minimum: '#50C878',
+    maximum: '#1E90FF',
+    average: '#9370DB'
+  });
+
   useEffect(() => {
     // Update tooltip data
     const consumptionValues = data.map(item => item.consumption);
@@ -73,7 +81,15 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
     if (mainChartRef.current && miniChartRef.current) {
       renderCharts();
     }
-  }, [data, traces]);
+  }, [data, traces, traceColors]);
+
+  // Handle color change for traces
+  const handleColorChange = (trace: keyof typeof traceColors, color: string) => {
+    setTraceColors(prev => ({
+      ...prev,
+      [trace]: color
+    }));
+  };
 
   const renderCharts = () => {
     if (!mainChartRef.current || !miniChartRef.current) return;
@@ -84,7 +100,7 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
     const temperatures = data.map(item => item.temperature);
 
     // Main chart data
-    const mainChartData: Plotly.Data[] = [
+    const mainChartData: Partial<Plotly.Data>[] = [
       {
         x: times,
         y: consumption,
@@ -104,8 +120,8 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
         type: 'scatter',
         mode: 'lines+markers',
         name: 'Temperature (°C)',
-        marker: { color: '#FF6B4A', size: 4 },
-        line: { color: '#FF6B4A', width: 2 },
+        marker: { color: traceColors.temperature, size: 4 },
+        line: { color: traceColors.temperature, width: 2 },
         yaxis: 'y2'
       });
     }
@@ -118,7 +134,7 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
         type: 'scatter',
         mode: 'lines',
         name: 'Minimum',
-        line: { color: '#50C878', width: 2, dash: 'dash' }
+        line: { color: traceColors.minimum, width: 2, dash: 'dash' }
       });
     }
 
@@ -129,7 +145,7 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
         type: 'scatter',
         mode: 'lines',
         name: 'Maximum',
-        line: { color: '#1E90FF', width: 2, dash: 'dash' }
+        line: { color: traceColors.maximum, width: 2, dash: 'dash' }
       });
     }
 
@@ -140,7 +156,7 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
         type: 'scatter',
         mode: 'lines',
         name: 'Average',
-        line: { color: '#9370DB', width: 2, dash: 'dash' }
+        line: { color: traceColors.average, width: 2, dash: 'dash' }
       });
     }
 
@@ -189,7 +205,7 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
         yref: 'y',
         text: 'Min',
         showarrow: false,
-        font: { color: '#50C878' },
+        font: { color: traceColors.minimum },
         xanchor: 'left'
       });
     }
@@ -202,7 +218,7 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
         yref: 'y',
         text: 'Max',
         showarrow: false,
-        font: { color: '#1E90FF' },
+        font: { color: traceColors.maximum },
         xanchor: 'left'
       });
     }
@@ -215,13 +231,13 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
         yref: 'y',
         text: 'Avg',
         showarrow: false,
-        font: { color: '#9370DB' },
+        font: { color: traceColors.average },
         xanchor: 'left'
       });
     }
 
     // Mini chart data
-    const miniChartData = [
+    const miniChartData: Partial<Plotly.Data>[] = [
       {
         x: times,
         y: consumption,
@@ -240,7 +256,7 @@ const EnergyConsumptionChart: React.FC<ChartProps> = ({ period, traces }) => {
         type: 'scatter',
         mode: 'lines',
         name: 'Temperature',
-        line: { color: '#FF6B4A', width: 1 },
+        line: { color: traceColors.temperature, width: 1 },
         showlegend: false,
         hoverinfo: 'none'
       });

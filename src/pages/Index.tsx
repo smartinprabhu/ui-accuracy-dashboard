@@ -17,6 +17,20 @@ const Index = () => {
     minimum: true,
     maximum: true,
   });
+  
+  const [traceColors, setTraceColors] = useState({
+    temperature: '#FF6B4A',
+    minimum: '#50C878',
+    maximum: '#1E90FF',
+    average: '#9370DB'
+  });
+
+  const handleColorChange = (trace: string, color: string) => {
+    setTraceColors(prev => ({
+      ...prev,
+      [trace]: color
+    }));
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#1a1f2c]">
@@ -56,11 +70,19 @@ const Index = () => {
                 </button>
               </div>
             </div>
-            <EnergyConsumptionChart period={activePeriod} traces={traces} />
+            <EnergyConsumptionChart 
+              period={activePeriod} 
+              traces={traces} 
+            />
           </div>
           
           <div className="lg:col-span-1">
-            <VisualizationControls traces={traces} setTraces={setTraces} />
+            <VisualizationControls 
+              traces={traces} 
+              setTraces={setTraces} 
+              traceColors={traceColors}
+              onColorChange={handleColorChange}
+            />
             <KeyMetrics />
             <RateConfiguration />
           </div>
